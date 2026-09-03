@@ -1,0 +1,12 @@
+targets:
+  - name: DTEU_Main
+    url: https://knute.edu.ua
+    expected_status: 200
+    timeout_seconds: 10
+    slow_threshold_ms: 3000
+    
+  - name: Google_Check
+    url: https://google.com
+    expected_status: 200
+    timeout_seconds: 5
+    slow_threshold_ms: 1000

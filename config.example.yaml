@@ -1,0 +1,12 @@
+targets:
+  - name: Slotelle
+    url: https://slotelle.com
+    expected_status: 200
+    timeout_seconds: 10
+    slow_threshold_ms: 3000
+
+  - name: Example
+    url: https://example.com
+    expected_status: 200
+    timeout_seconds: 10
+    slow_threshold_ms: 3000
