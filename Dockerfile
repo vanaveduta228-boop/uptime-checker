@@ -3,4 +3,5 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["python", "-m", "uptime_checker", "--config", "config.yaml"]
+ENTRYPOINT ["python", "-m", "uptime_checker"]
+CMD ["--config", "config.yaml"]

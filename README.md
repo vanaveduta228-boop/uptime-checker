@@ -12,7 +12,7 @@
 
 **1. Клонирование репозитория**
 ```bash
-git clone <ССЫЛКА_НА_ТВОЙ_РЕПОЗИТОРИЙ>
+git clone https://github.com/vanaveduta228-boop/uptime-checker
 cd uptime-checker
 
 ```
@@ -32,22 +32,19 @@ docker build -t uptime-checker .
 
 ```
 
-**4. Запуск проверки (в Windows PowerShell)**
-Контейнер запускается с пробросом вашего локального файла конфигурации внутрь:
+**4. Запуск проверки (збереження звіту на комп'ютері)**
+Контейнер запускається з пробросом вашого локального файлу конфігурації всередину та монтуванням папки для збереження звіту назовні:
 
 ```powershell
-docker run --rm -v ${PWD}\config.yaml:/app/config.yaml uptime-checker
-
-```
-
-*(Для Linux/Mac используйте `$(pwd)` вместо `${PWD}`)*
+docker run --rm -v ${PWD}\config.yaml:/app/config.yaml -v${PWD}:/app/out uptime-checker --config /app/config.yaml --output /app/out/report.json
+(Для Linux/Mac використовуйте $(pwd) замість ${PWD})
 
 ## 📝 Пример файла config.yaml
 
 ```yaml
 targets:
   - name: DTEU_Main
-    url: [https://knute.edu.ua](https://knute.edu.ua)
+    url: https://example.com
     expected_status: 200
     timeout_seconds: 10
     slow_threshold_ms: 3000

@@ -5,7 +5,9 @@ from datetime import datetime, timezone
 from .config import load_config
 from .checker import check_site
 from .reporting import evaluate_result
+from pathlib import Path
 
+now_utc = datetime.now(timezone.utc).isoformat()
 parser = argparse.ArgumentParser(description="Утиліта перевірки доступності сайтів")
 parser.add_argument("--config", required=True, help="Шлях до файлу конфігурації")
 parser.add_argument("--output", help="Шлях до файлу JSON-звіту")
@@ -41,21 +43,26 @@ for target in targets:
 
 print()
 print(f"Разом: {len(targets)} | OK: {ok_count} | WARN: {warn_count} | FAIL: {fail_count}")
-if args.output:
-    now_utc = datetime.now(timezone.utc).isoformat()
-    report_data = {
-        "timestamp_utc": now_utc,
-        "results": results_list,
-        "summary": {
-            "total": len(targets),
-            "ok": ok_count,
-            "warn": warn_count,
-            "fail": fail_count
-        }
-    }   
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(report_data, f, indent=4, ensure_ascii=False)
-        
+try:
+    if args.output:
+        report_path = Path(args.output)
+        report_data = {
+            "timestamp_utc": now_utc,
+            "results": results_list,
+            "summary": {
+                "total": len(targets),
+                "ok": ok_count,
+                "warn": warn_count,
+                "fail": fail_count
+            }
+        } 
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(report_data, f, indent=4, ensure_ascii=False)    
+except Exception as e:
+    print(f"Помилка запису файлу:: {e}")
+    sys.exit(1)
+
 if fail_count > 0:
     sys.exit(1)
 else:

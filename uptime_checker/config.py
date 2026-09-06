@@ -28,11 +28,23 @@ def load_config(file_path):
             sys.exit(2)
 
         url = target['url']
+        if not isinstance(url, str):
+            print(f"Помилка: URL для цілі '{target.get('name', 'Unknown')}' має бути текстом.")
+            sys.exit(2)
+
         if not (url.startswith('http://') or url.startswith('https://')):
             print(f"Помилка: URL '{url}' має починатися з http:// або https://")
+            sys.exit(2)
+
+        if not isinstance(target['expected_status'], int):
+            print(f"Помилка: Очікуваний статус для '{url}' має бути цілим числом (наприклад, 200).")
+            sys.exit(2)
+
+        if not isinstance(target['timeout_seconds'], (int, float)) or not isinstance(target['slow_threshold_ms'], (int, float)):
+            print(f"Помилка: Таймаут та поріг для '{url}' мають бути числами.")
             sys.exit(2)
 
         if target['timeout_seconds'] <=0 or target['slow_threshold_ms'] <=0:
             print(f"Помилка: Таймаут або поріг для '{url}' має бути більшим за 0.")
             sys.exit(2)
-    return targets
+        return targets
