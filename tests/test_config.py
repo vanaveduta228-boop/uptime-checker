@@ -54,8 +54,8 @@ def test_json_write_error(tmp_path):
 
     assert result.returncode == 1
 
-@patch('uptime_checker.checker.requests.get')
-def test_successful_run_and_continue(tmp_path, mock_get):
+
+def test_successful_run_and_continue(tmp_path):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -80,18 +80,20 @@ def test_successful_run_and_continue(tmp_path, mock_get):
     with open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(test_data, f)
 
-    mock_get.side_effect = [Mock(status_code=200), requests.exceptions.ConnectionError()]
     fake_args = ['uptime_checker', '--config', str(config_file), '--output', str(output_file)]
-    with patch('sys.argv', fake_args):
-        with pytest.raises(SystemExit) as excinfo:
-            main()
-    
+    with patch('uptime_checker.checker.requests.get') as mock_get:
+        mock_get.side_effect = [Mock(status_code=200), requests.exceptions.ConnectionError()]
+        
+        with patch('sys.argv', fake_args):
+            with pytest.raises(SystemExit) as excinfo:
+                main()
+                
     assert output_file.exists(), "Файл отчета не был создан!"
     assert excinfo.value.code == 1
 
 
-@patch('uptime_checker.checker.requests.get')
-def test_perfect_run(tmp_path, mock_get):
+
+def test_perfect_run(tmp_path):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -108,12 +110,14 @@ def test_perfect_run(tmp_path, mock_get):
 
     with open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(test_data, f)
-    mock_get.return_value = Mock(status_code=200)
     fake_args = ['uptime_checker', '--config', str(config_file), '--output', str(output_file)]
-    with patch('sys.argv', fake_args):
-        with pytest.raises(SystemExit) as excinfo:
-            main() 
-
+    with patch('uptime_checker.checker.requests.get') as mock_get:
+        mock_get.return_value = Mock(status_code=200) # Настраиваем ответ
+        
+        with patch('sys.argv', fake_args):
+            with pytest.raises(SystemExit) as excinfo:
+                main()
+                
     assert excinfo.value.code == 0
     assert output_file.exists()
 
