@@ -1,0 +1,28 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Отримання коду
+      uses: actions/checkout@v4
+
+    - name: Встановлення Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Встановлення залежностей
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Запуск тестів (pytest)
+      run: pytest
+
+    - name: Збірка Docker-образу
+      run: docker build -t uptime-checker .

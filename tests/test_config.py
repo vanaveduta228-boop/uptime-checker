@@ -2,7 +2,10 @@ import pytest
 import yaml
 import subprocess
 import sys
+import requests
 from uptime_checker.config import load_config
+from uptime_checker.__main__ import main
+from unittest.mock import patch, Mock
 
 def test_invalid_url_type(tmp_path):
     test_file= tmp_path / "bad_config.yaml"
@@ -51,7 +54,8 @@ def test_json_write_error(tmp_path):
 
     assert result.returncode == 1
 
-def smoke_successful_run_and_continue(tmp_path):
+@patch('uptime_checker.checker.requests.get')
+def test_successful_run_and_continue(tmp_path, mock_get):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -76,19 +80,18 @@ def smoke_successful_run_and_continue(tmp_path):
     with open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(test_data, f)
 
-    result = subprocess.run(
-        [sys.executable, "-m", "uptime_checker", "--config", str(config_file), "--output", str(output_file)],
-        capture_output=True, text=True
-    )
-    # Выводим скрытую ошибку на экран, чтобы мы могли ее прочитать
-    print("\n--- ОШИБКА ВНУТРИ СКРИПТА ---")
-    print(result.stderr)
-    print("-----------------------------\n")
+    mock_get.side_effect = [Mock(status_code=200), requests.exceptions.ConnectionError()]
+    fake_args = ['uptime_checker', '--config', str(config_file), '--output', str(output_file)]
+    with patch('sys.argv', fake_args):
+        with pytest.raises(SystemExit) as excinfo:
+            main()
     
     assert output_file.exists(), "Файл отчета не был создан!"
-    assert result.returncode == 1
+    assert excinfo.value.code == 1
 
-def smoke_perfect_run(tmp_path):
+
+@patch('uptime_checker.checker.requests.get')
+def test_perfect_run(tmp_path, mock_get):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -105,14 +108,14 @@ def smoke_perfect_run(tmp_path):
 
     with open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(test_data, f)
+    mock_get.return_value = Mock(status_code=200)
+    fake_args = ['uptime_checker', '--config', str(config_file), '--output', str(output_file)]
+    with patch('sys.argv', fake_args):
+        with pytest.raises(SystemExit) as excinfo:
+            main() 
 
-    result = subprocess.run(
-        [sys.executable, "-m", "uptime_checker", "--config", str(config_file), "--output", str(output_file)],
-        capture_output=True, text=True
-    )
-
+    assert excinfo.value.code == 0
     assert output_file.exists()
-    assert result.returncode == 0
 
 
 def test_multiple_targets_validation(tmp_path):

@@ -58,7 +58,7 @@ targets:
 Для запуску тестів (якщо у вас встановлений Python локально):
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pytest
 
 ```
