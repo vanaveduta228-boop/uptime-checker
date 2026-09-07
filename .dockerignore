@@ -1,0 +1,8 @@
+.git
+.gitignore
+venv/
+tests/
+.pytest_cache/
+config.yaml
+report.json
+example_report.json

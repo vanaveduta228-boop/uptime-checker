@@ -7,7 +7,7 @@ from uptime_checker.checker import check_site
 def test_check_site_success(mock_get):
     mock_get.return_value = Mock(status_code=200)
     target = {
-        "url": "https://example.comhttps", 
+        "url": "https://example.com", 
         "timeout_seconds": 10
     }
     result = check_site(target)

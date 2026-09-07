@@ -51,7 +51,7 @@ def test_json_write_error(tmp_path):
 
     assert result.returncode == 1
 
-def test_successful_run_and_continue(tmp_path):
+def smoke_successful_run_and_continue(tmp_path):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -88,7 +88,7 @@ def test_successful_run_and_continue(tmp_path):
     assert output_file.exists(), "Файл отчета не был создан!"
     assert result.returncode == 1
 
-def test_perfect_run(tmp_path):
+def smoke_perfect_run(tmp_path):
     config_file = tmp_path / "config.yaml"
     output_file = tmp_path / "report.json"
     test_data = {
@@ -113,3 +113,33 @@ def test_perfect_run(tmp_path):
 
     assert output_file.exists()
     assert result.returncode == 0
+
+
+def test_multiple_targets_validation(tmp_path):
+    config_file = tmp_path / "config.yaml"
+    test_data = {
+        "targets": [
+            {
+                "name": "Good Site",
+                "url": "https://example.com",
+                "expected_status": 200,
+                "timeout_seconds": 10,
+                "slow_threshold_ms": 1000
+            },
+            {
+                "name": "Bad Site",
+                "url": 123,
+                "expected_status": 200,
+                "timeout_seconds": 10,
+                "slow_threshold_ms": 1000
+            }
+        ]  
+    }
+
+    with open (config_file, "w", encoding="utf-8") as f:
+        yaml.dump(test_data, f)
+
+    with pytest.raises(SystemExit) as excinfo:
+        load_config(config_file)
+
+    assert excinfo.value.code == 2

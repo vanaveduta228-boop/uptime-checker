@@ -47,4 +47,4 @@ def load_config(file_path):
         if target['timeout_seconds'] <=0 or target['slow_threshold_ms'] <=0:
             print(f"Помилка: Таймаут або поріг для '{url}' має бути більшим за 0.")
             sys.exit(2)
-        return targets
+    return targets
